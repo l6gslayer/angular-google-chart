@@ -1,4 +1,4 @@
-/*! angular-google-chart 2015-11-29 */
+/*! angular-google-chart 2016-12-30 */
 /*
 * @description Google Chart Api Directive Module for AngularJS
 * @version 0.1.0
@@ -224,9 +224,9 @@
 /* global angular */
 (function(){
     angular.module('googlechart')
-        .directive('agcBeforeDraw', onReadyDirective);
+        .directive('agcBeforeDraw', beforeDrawDirective);
         
-    function onReadyDirective(){
+    function beforeDrawDirective(){
         return {
             restrict: 'A',
             scope: false,
@@ -243,6 +243,7 @@
         };
     }
 })();
+
 (function(){
     angular.module('googlechart')
         .directive('agcOnClick', onClickDirective);
@@ -356,6 +357,37 @@
     }
 })();
 /* global angular */
+
+(function(){
+    angular.module('googlechart')
+        .directive('agcOnRangeChange', agcOnRangeChangeDirective);
+
+    function agcOnRangeChangeDirective(){
+        return {
+            restrict: 'A',
+            scope: false,
+            require: 'googleChart',
+            link: function(scope, element, attrs, googleChartController){
+                callback.$inject = ['args', 'chart', 'chartWrapper'];
+                function callback(args, chart, chartWrapper){
+                    var returnParams = {
+                        chartWrapper: chartWrapper,
+                        chart: chart,
+                        args: args,
+                        start: args[0].start,
+                        end: args[0].end
+                    };
+                    scope.$apply(function () {
+                        scope.$eval(attrs.agcOnRangeChange, returnParams);
+                    });
+                }
+                googleChartController.registerChartListener('rangechange', callback, this);
+            }
+        };
+    }
+})();
+
+/* global angular */
 (function(){
     angular.module('googlechart')
         .directive('agcOnReady', onReadyDirective);
@@ -459,7 +491,7 @@
 
             settings = angular.extend({}, apiConfig.optionalSettings, settings);
 
-            window.google.load('visualization', apiConfig.version, settings);
+            window.google.charts.load('current', settings);
         };
         var head = document.getElementsByTagName('head')[0];
         var script = document.createElement('script');
@@ -802,7 +834,7 @@
         
     function googleJsapiUrlProvider() {
         var protocol = 'https:';
-        var url = '//www.google.com/jsapi';
+        var url = 'www.gstatic.com/charts/loader.js';
         
         this.setProtocol = function (newProtocol) {
             protocol = newProtocol;
@@ -817,3 +849,4 @@
         };
     }
 })();
+//# sourceMappingURL=ng-google-chart.js.map
